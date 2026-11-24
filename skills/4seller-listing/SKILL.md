@@ -1,6 +1,6 @@
 ---
-name: listing
-description: Prepare 4Seller listing drafts from a spreadsheet, product URLs, pasted product data, or platform API output. Use to preview product data, save it to the 4Seller crawl box, generate drafts for authorized shops, or check draft progress and failure reasons. Publishing is handled by the user in 4Seller.
+name: 4seller-listing
+description: Turn a spreadsheet (Excel/CSV), product URLs, pasted product data, or platform API output into 4Seller listing drafts. Data is normalized, saved to the 4Seller crawl box, and drafts are generated for one or many authorized shops, with progress and failure reasons. Use for bulk listing draft import, multi-shop drafts, and draft troubleshooting. Publishing stays a user action in 4Seller.
 license: MIT
 compatibility: "Requires 4Seller MCP tools list_stores, save_crawl_draft, create_listing_draft, get_draft_status."
 ---

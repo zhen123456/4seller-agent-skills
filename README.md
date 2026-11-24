@@ -12,7 +12,7 @@ With the skills CLI or a manual copy, configure the server separately before sig
 | Skill | Capabilities | Writes? | Try asking |
 |---|---|---|---|
 | [`4seller-inventory`](skills/4seller-inventory/SKILL.md) | Check available and on-hand stock, review stock movements, add units or set a target quantity | Reads current stock before making an authorized adjustment | “Show available and on-hand stock for SKU ABC-123 by warehouse.” |
-| [`listing`](skills/listing/SKILL.md) | Turn a spreadsheet, product URLs, pasted data, or API output into listing drafts | Saves products to the crawl box (4Seller’s staging area for product data) and creates drafts after confirmation | “Check this spreadsheet for my Shopify shop and show me a draft preview before saving.” |
+| [`4seller-listing`](skills/4seller-listing/SKILL.md) | Turn a spreadsheet, product URLs, pasted data, or API output into listing drafts | Saves products to the crawl box (4Seller’s staging area for product data) and creates drafts after confirmation | “Check this spreadsheet for my Shopify shop and show me a draft preview before saving.” |
 
 Neither skill publishes to a marketplace; publishing stays a user action inside 4Seller.
 
@@ -26,16 +26,19 @@ Neither skill publishes to a marketplace; publishing stays a user action inside 
 ```
 
 The plugin declares the server in `.mcp.json`; finish with the sign-in at `/mcp`.
-The plugin exposes the skills as `/4seller:4seller-inventory` and `/4seller:listing`.
+The plugin exposes the skills as `/4seller:4seller-inventory` and `/4seller:4seller-listing`.
 
 ### Codex plugin (skills + MCP connection, auth at install)
 
 ```bash
-codex plugin marketplace add https://github.com/zhen123456/4seller-agent-skills
-codex plugin add 4seller@4seller-agent-skills
+codex plugin marketplace add zhen123456/4seller-agent-skills
+codex plugin marketplace list          # note the registered marketplace name
+codex plugin add 4seller@<marketplace-name-from-the-list>
 ```
 
 Complete 4Seller sign-in when prompted. The marketplace requests authentication at installation.
+Alternatively, open the repository in Codex and run `/plugins` to install from its repo marketplace,
+and pin a version with `codex plugin marketplace add zhen123456/4seller-agent-skills --ref v0.1.1`.
 Start a new Codex session, use `/mcp` to check the connection, and try the read-only SKU example
 below.
 
@@ -76,7 +79,7 @@ Use the MCP setup commands above for your client and complete 4Seller sign-in.
 ## One install channel per machine
 
 Identity here is name-based (no opaque IDs): marketplace `4seller-agent-skills`, plugin `4seller`,
-skills `4seller-inventory` / `listing`, MCP server `4seller-prod`.
+skills `4seller-inventory` / `4seller-listing`, MCP server `4seller-prod`.
 
 | Situation | What happens |
 |---|---|
@@ -93,11 +96,11 @@ Pick one route per machine and stay on it. To inspect or clean up:
 codex plugin list                                # Codex
 codex plugin remove 4seller@4seller-agent-skills
 npx skills list                                  # skills CLI
-npx skills remove 4seller-inventory listing
+npx skills remove 4seller-inventory 4seller-listing
 ```
 
-If you installed an older `4seller-listing` or `sku` folder using the skills CLI or a manual
-copy, remove that old copy after upgrading.
+If you installed an older `listing` or `sku` folder using the skills CLI or a manual copy,
+remove that old copy after upgrading.
 
 ## Repository layout
 
@@ -113,7 +116,7 @@ copy, remove that old copy after upgrading.
 ├── .mcp.json                 # 4Seller MCP server, bundled with both plugins
 ├── skills/
 │   ├── 4seller-inventory/{SKILL.md, references/mcp-tools.md}
-│   └── listing/{SKILL.md, references/mcp-tools.md, batch-mapping.md}
+│   └── 4seller-listing/{SKILL.md, references/mcp-tools.md, batch-mapping.md}
 ├── README.md
 └── LICENSE
 ```
@@ -147,7 +150,7 @@ authoritative — re-verify after server changes.
 
 - Keep the repository **public**: `npx skills add` and marketplace import need read access.
 - Suggested topics: `agent-skills`, `mcp`, `4seller`, `ecommerce`, `erp`.
-- Tag releases (`v0.1.0`) so users can pin.
+- Tag releases (`v0.1.1`) so users can pin.
 - Workspace admins can import the marketplace: *Workspace settings → Plugins → Add → Import
   marketplace*, repository URL only.
 

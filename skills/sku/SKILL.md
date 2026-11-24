@@ -1,13 +1,11 @@
 ---
-name: 4seller-inventory
-description: Query and adjust stock in 4Seller ERP through MCP. Reports current available and on-hand quantities by merchant SKU, internal SKU ID, warehouse or stock location; reads inventory flow (movement) history for a date range; and adjusts stock with a read-before-write check. Use when the user asks how much stock is left, where it is stored, what moved in or out, or wants a quantity increased or set — inventory, stock, available quantity, on-hand, reserved, warehouse stock, stock movement, inventory flow, adjust stock, quantity correction via their authorized 4Seller account.
+name: sku
+description: Check available and on-hand stock or review inventory movements in 4Seller ERP by SKU, warehouse, or stock location. Use for 4Seller stock queries and corrections. Adjustments support adding a positive quantity (increase) or setting on-hand stock to a specified quantity (set), after reading and confirming current stock.
 license: MIT
 compatibility: "Requires 4Seller MCP tools list_stores, list_inventory, list_inventory_flows, adjust_inventory."
 ---
 
-# 4Seller inventory
-
-Three capabilities, nothing more:
+# 4Seller SKU inventory
 
 | # | Capability | Tool |
 |---|---|---|
@@ -21,8 +19,8 @@ Field names, meanings, parameters, verified limits and known server limitations:
 ## Connection check
 
 If the 4Seller tools are not available in this session, the MCP server is not connected yet. The
-4Seller plugin registers it on install and asks the user to sign in (Claude Code: `/mcp`; Codex: the
-OAuth prompt at install). For a skill-only install, ask the user to run
+4Seller plugin includes the server configuration. Have the user check `/mcp` and complete
+4Seller sign-in when prompted. For a skill-only install, ask the user to run
 `claude mcp add --transport http 4seller-prod https://www.4seller.com/api/mcp` or
 `codex mcp add 4seller-prod --url https://www.4seller.com/api/mcp` followed by
 `codex mcp login 4seller-prod`. Do not try to reach 4Seller data by any other route.

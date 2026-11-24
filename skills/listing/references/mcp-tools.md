@@ -20,12 +20,17 @@ Only `authStatus = 1` and `supportPublish = true` are valid draft targets.
 
 ## `save_crawl_draft` — writes the crawl box record
 
-### Required
+### Product title and source URL
+
+The skill accepts products without a URL for preview. The connected MCP schema determines
+whether a source URL is needed to save. The schema documented on 2026-11-24 declared both
+`title` and `sourceUrl` required. When the current schema permits omission, leave out a
+missing URL. When it requires one, flag the product as blocked pending a real URL.
 
 | Param | Type | Note |
 |---|---|---|
-| `sourceUrl` | string | Source product URL; used for traceability and duplicate detection |
 | `title` | string | Product title |
+| `sourceUrl` | string | Real source product URL, when available. Used for traceability and duplicate detection |
 
 ### Optional
 
@@ -66,7 +71,8 @@ Fallbacks when omitted: `variantName` → product `title`; `currency` → produc
 ### Behaviour
 
 - Fields outside this list are not stored (e.g. `productAttributes`, `searchTerms`, `sku`).
-- Each call creates a new crawl-box record; the same `sourceUrl` again returns `repeat: true`.
+- Saving the same `sourceUrl` again can create another crawl-box record and return
+  `repeat: true`. Use it to report the result of a save attempt.
 - `shopIds` / `site` / `siteList` are action parameters and are **not** stored on the record.
 - With `shopIds`, store checks run first; an unauthorized shop or unsupported platform fails
   the whole call before the async job is queued.
@@ -110,6 +116,7 @@ means the run cannot be located.
 ## Verified behaviours worth remembering
 
 1. A price without `currency` is rejected — read the currency from the source, never assume.
-2. `repeat: true` is a duplicate signal, not an error: surface it and let the user decide.
+2. `repeat: true` flags a duplicate after the save attempt. Report it and verify any actions
+   already taken before issuing another write.
 3. Save-and-generate mode is not re-runnable per product; a retry creates a second draft.
 4. 4Seller does not read the source page: if data is missing, the caller must fill it in.

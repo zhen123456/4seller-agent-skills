@@ -1,6 +1,6 @@
 ---
-name: 4seller-listing
-description: Convert listing raw data — an Excel/CSV/XLSX export, one or many product URLs, pasted structured data, or platform API output — into listing drafts for target shops in 4Seller. Data is normalized, validated, written to the 4Seller crawl box, then listing drafts are generated for the selected shops and tracked to completion. Use when the user has a product list or spreadsheet to turn into drafts, wants to push one or many products to several shops or sites, or needs draft generation progress and failure reasons — via their authorized 4Seller account.
+name: listing
+description: Prepare 4Seller listing drafts from a spreadsheet, product URLs, pasted product data, or platform API output. Use to preview product data, save it to the 4Seller crawl box, generate drafts for authorized shops, or check draft progress and failure reasons. Publishing is handled by the user in 4Seller.
 license: MIT
 compatibility: "Requires 4Seller MCP tools list_stores, save_crawl_draft, create_listing_draft, get_draft_status."
 ---
@@ -18,14 +18,15 @@ listing raw data (Excel/CSV/XLSX, product URL(s), pasted structured data, platfo
    → listing drafts for the selected shops
 ```
 
-The crawl box is the single entry point: nothing reaches a shop before its record exists there.
+The crawl box is 4Seller's staging area for product data. Each product is saved there before
+drafts are generated for the selected shops.
 **This skill never publishes to a marketplace** — publishing stays a user action inside 4Seller.
 
 ## Connection check
 
 If the 4Seller tools are not available in this session, the MCP server is not connected yet. The
-4Seller plugin registers it on install and asks the user to sign in (Claude Code: `/mcp`; Codex: the
-OAuth prompt at install). For a skill-only install, ask the user to run
+4Seller plugin includes the server configuration. Have the user check `/mcp` and complete
+4Seller sign-in when prompted. For a skill-only install, ask the user to run
 `claude mcp add --transport http 4seller-prod https://www.4seller.com/api/mcp` or
 `codex mcp add 4seller-prod --url https://www.4seller.com/api/mcp` followed by
 `codex mcp login 4seller-prod`. Do not try to reach 4Seller data by any other route.
@@ -39,8 +40,8 @@ OAuth prompt at install). For a skill-only install, ask the user to run
 | Pasted structured data (JSON/table) | Use the fields as given | Missing required fields, currency pairing |
 | Platform API output | Use the provider's objects | Status/unit conversion, identifier codes |
 
-Bulk runs: the mapping table and the per-row result report are the deliverables, so a second
-run on the same file produces the same records. Template and batch rules:
+For bulk runs, provide the mapping table and per-product result report. Reuse the field mapping
+for the same file and check previous write results before resuming. See the template and
 [batch mapping](references/batch-mapping.md).
 
 ## Target shops and platforms
@@ -58,10 +59,13 @@ shop or a product × shop matrix. Never bind a shop by name similarity alone.
 
 Read [MCP tools](references/mcp-tools.md) for the exact input list before building anything.
 
-- Build one product object per row/URL. Never invent a value: a required field that the source
-  does not provide is either asked for or left out **and reported**.
-- `sourceUrl` is required by the tool. When a spreadsheet row has no URL, ask the user for a
-  reference URL per product, or a batch rule they own; do not fabricate one.
+- Group rows by product before creating records. Use the source's parent product identifier when
+  one is available and combine its variant rows into one product object. Distinct products each
+  get one object.
+- `sourceUrl` is optional for intake and preview. Preserve a real URL when provided and leave it
+  blank in the preview when absent. At save time, omit the field if the live tool schema accepts
+  omission. If the schema or server requires a URL, report the affected products as blocked
+  pending real URLs and proceed with the other confirmed products. Never fabricate URLs.
 - Every price — product or variant — must carry an ISO 4217 currency. `currency` is never defaulted.
 - Variants must be real combinations with real attribute values; a flattened "one size/one color"
   row loses data and should be flagged rather than guessed.
@@ -69,9 +73,9 @@ Read [MCP tools](references/mcp-tools.md) for the exact input list before buildi
 
 ## Step 3 — validate before writing
 
-Show a row-level preview table: product title, `sourceUrl`, price + currency, image count,
-variant count, missing required fields, mapped/unmapped columns. Ask for confirmation. Rows that
-fail validation are excluded from the write and reported — do not silently drop them.
+Show one preview row per product with its title, `sourceUrl` if available, price and currency,
+image and variant counts, missing required fields, and mapped and unmapped columns. Ask for
+confirmation. Report validation failures and exclude those products from the write.
 
 ## Step 4 — write to the crawl box
 
@@ -83,8 +87,9 @@ One `save_crawl_draft` call per product. Two modes:
 | Save and generate | include `shopIds` | crawl-box record **and** drafts start generating, plus `scheduleCode` |
 
 `shopIds`, `site` and `siteList` are action parameters only — they are not stored on the record.
-Deduplicate before writing: the same `sourceUrl` already in the crawl box returns `repeat: true`;
-surface it and let the user decide instead of duplicating silently.
+Deduplicate within the batch using a real source URL when present or a stable source product
+identifier when it is absent. A returned `repeat: true` can mean a duplicate record has already
+been saved. Report the result and avoid generating another draft for that product.
 
 ## Step 5 — generate drafts (save-only mode)
 
@@ -94,7 +99,7 @@ comes from the store's price rule, not from this call.
 
 ## Step 6 — track the batch
 
-Collect every `scheduleCode` (from mode B or from Step 5) and poll `get_draft_status` until
+Collect every `scheduleCode` (from save-and-generate mode or Step 5) and poll `get_draft_status` until
 `succeed + failed == total` per run. Report a matrix: product × shop × outcome, each failure with
 its `reason`. `failed > 0` is a result to report, not a tool error. If a run is still going after a
 few minutes, report confirmed progress and stop polling.
@@ -102,8 +107,10 @@ few minutes, report confirmed progress and stop polling.
 ## Batch discipline
 
 - Work in confirmed chunks (for example 20–25 products per preview) and keep a running result table.
-- One bad row must not abort the batch: collect row-level errors and continue with valid rows.
-- Unknown write outcome (timeout, interrupted call): re-check the crawl box (`repeat`) before retrying.
+- Report errors for each affected product and continue with other valid products.
+- Unknown write outcome (timeout or interrupted call): check the crawl box or draft status
+  through an available read-only route. A second save is a write. If you cannot verify the
+  outcome, report it as unknown and pause that product.
 - Never re-run a save-and-generate batch as a whole; re-run only rows that have no record yet.
 
 ## Failure handling
@@ -111,9 +118,10 @@ few minutes, report confirmed progress and stop polling.
 | Situation | Action |
 |---|---|
 | Authorization invalid or expired | Ask the user to re-authorize, then retry once |
-| Missing `sourceUrl` or `title` | Ask the user; do not fabricate |
+| Missing title | Ask for the missing title |
+| Connected tool requires a URL | Ask for a real URL for the affected product and continue with the rest |
 | Price without currency | Read the currency from the source and retry, or drop the price |
-| `repeat: true` | Surface to the user; continue only on their decision |
+| `repeat: true` | Report what has already been saved or queued. Confirm before any further write for that product |
 | Shop not authorized / platform unsupported | Deterministic: change or reconnect the shop, do not retry |
 | Unknown or expired `scheduleCode` | Say the run cannot be located; do not guess |
 | Rate limited | Back off, then retry once |

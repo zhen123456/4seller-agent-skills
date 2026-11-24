@@ -38,7 +38,7 @@ codex plugin add 4seller@<marketplace-name-from-the-list>
 
 Complete 4Seller sign-in when prompted. The marketplace requests authentication at installation.
 Alternatively, open the repository in Codex and run `/plugins` to install from its repo marketplace,
-and pin a version with `codex plugin marketplace add zhen123456/4seller-agent-skills --ref v0.1.0`.
+and pin a version with `codex plugin marketplace add zhen123456/4seller-agent-skills --ref v0.1.1`.
 Start a new Codex session, use `/mcp` to check the connection, and try the read-only SKU example
 below.
 
@@ -150,7 +150,7 @@ authoritative — re-verify after server changes.
 
 - Keep the repository **public**: `npx skills add` and marketplace import need read access.
 - Suggested topics: `agent-skills`, `mcp`, `4seller`, `ecommerce`, `erp`.
-- Tag releases (`v0.1.0`) so users can pin.
+- Tag releases (`v0.1.1`) so users can pin.
 - Workspace admins can import the marketplace: *Workspace settings → Plugins → Add → Import
   marketplace*, repository URL only.
 

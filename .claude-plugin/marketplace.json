@@ -1,0 +1,14 @@
+{
+  "name": "4seller-agent-skills",
+  "description": "4Seller Agent Skills: inventory queries and stock adjustments, plus listing drafts from raw product data, through the 4Seller MCP server.",
+  "owner": {
+    "name": "4Seller"
+  },
+  "plugins": [
+    {
+      "name": "4seller",
+      "source": "./",
+      "description": "Both 4Seller skills plus the 4Seller MCP server connection: query and adjust stock, and turn raw product data into listing drafts."
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "4seller",
+  "version": "0.1.0",
+  "description": "4Seller Agent Skills: inventory queries and stock adjustments, plus listing drafts from raw product data. Bundles the 4Seller MCP server.",
+  "author": {
+    "name": "4Seller"
+  },
+  "license": "MIT",
+  "homepage": "https://www.4seller.com"
+}

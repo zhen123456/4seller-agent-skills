@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "4seller-prod": {
+      "type": "http",
+      "url": "https://www.4seller.com/api/mcp"
+    }
+  }
+}

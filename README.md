@@ -11,7 +11,7 @@ With the skills CLI or a manual copy, configure the server separately before sig
 
 | Skill | Capabilities | Writes? | Try asking |
 |---|---|---|---|
-| [`sku`](skills/sku/SKILL.md) | Check available and on-hand stock, review stock movements, add units or set a target quantity | Reads current stock before making an authorized adjustment | “Show available and on-hand stock for SKU ABC-123 by warehouse.” |
+| [`4seller-inventory`](skills/4seller-inventory/SKILL.md) | Check available and on-hand stock, review stock movements, add units or set a target quantity | Reads current stock before making an authorized adjustment | “Show available and on-hand stock for SKU ABC-123 by warehouse.” |
 | [`listing`](skills/listing/SKILL.md) | Turn a spreadsheet, product URLs, pasted data, or API output into listing drafts | Saves products to the crawl box (4Seller’s staging area for product data) and creates drafts after confirmation | “Check this spreadsheet for my Shopify shop and show me a draft preview before saving.” |
 
 Neither skill publishes to a marketplace; publishing stays a user action inside 4Seller.
@@ -26,7 +26,7 @@ Neither skill publishes to a marketplace; publishing stays a user action inside 
 ```
 
 The plugin declares the server in `.mcp.json`; finish with the sign-in at `/mcp`.
-The plugin exposes the skills as `/4seller:sku` and `/4seller:listing`.
+The plugin exposes the skills as `/4seller:4seller-inventory` and `/4seller:listing`.
 
 ### Codex plugin (skills + MCP connection, auth at install)
 
@@ -76,7 +76,7 @@ Use the MCP setup commands above for your client and complete 4Seller sign-in.
 ## One install channel per machine
 
 Identity here is name-based (no opaque IDs): marketplace `4seller-agent-skills`, plugin `4seller`,
-skills `sku` / `listing`, MCP server `4seller-prod`.
+skills `4seller-inventory` / `listing`, MCP server `4seller-prod`.
 
 | Situation | What happens |
 |---|---|
@@ -93,11 +93,11 @@ Pick one route per machine and stay on it. To inspect or clean up:
 codex plugin list                                # Codex
 codex plugin remove 4seller@4seller-agent-skills
 npx skills list                                  # skills CLI
-npx skills remove sku listing
+npx skills remove 4seller-inventory listing
 ```
 
-If you installed the previous `4seller-inventory` and `4seller-listing` folders using the skills
-CLI or a manual copy, remove those copies after upgrading to `sku` and `listing`.
+If you installed an older `4seller-listing` or `sku` folder using the skills CLI or a manual
+copy, remove that old copy after upgrading.
 
 ## Repository layout
 
@@ -112,7 +112,7 @@ CLI or a manual copy, remove those copies after upgrading to `sku` and `listing`
 │   └── plugins/marketplace.json   # Codex repo marketplace (auth on install)
 ├── .mcp.json                 # 4Seller MCP server, bundled with both plugins
 ├── skills/
-│   ├── sku/{SKILL.md, references/mcp-tools.md}
+│   ├── 4seller-inventory/{SKILL.md, references/mcp-tools.md}
 │   └── listing/{SKILL.md, references/mcp-tools.md, batch-mapping.md}
 ├── README.md
 └── LICENSE

@@ -1,11 +1,11 @@
 ---
-name: sku
+name: 4seller-inventory
 description: Check available and on-hand stock or review inventory movements in 4Seller ERP by SKU, warehouse, or stock location. Use for 4Seller stock queries and corrections. Adjustments support adding a positive quantity (increase) or setting on-hand stock to a specified quantity (set), after reading and confirming current stock.
 license: MIT
 compatibility: "Requires 4Seller MCP tools list_stores, list_inventory, list_inventory_flows, adjust_inventory."
 ---
 
-# 4Seller SKU inventory
+# 4Seller inventory
 
 | # | Capability | Tool |
 |---|---|---|
